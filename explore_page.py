@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+from dotenv import load_dotenv
+import psycopg2
+
+load_dotenv()
 
 def shorten_categories(categories, cutoff):
     categorical_map = {}
@@ -30,22 +35,44 @@ def clean_education(x):
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("survey_results_public.csv")
-    df = df[["Country", "EdLevel", "YearsCodePro", "Employment", "ConvertedCompYearly"]]
-    df = df.rename({"ConvertedCompYearly": "Salary"}, axis = 1) 
-    df = df[df["Salary"].notnull()]
+    host = os.getenv("NEONDB_HOST")
+    database = os.getenv("NEONDB_DATABASE")
+    user = os.getenv("NEONDB_USER")
+    password = os.getenv("NEONDB_PASSWORD")
+    port = os.getenv("NEONDB_PORT")
+    #print("Database Host:", host)
+    try:
+        conn = psycopg2.connect(
+            host=host,
+            database=database,
+            user=user,
+            password=password,
+            port=port
+        )
+        print("Connection successful!")
+        cursor = conn.cursor()
+        cursor.execute("SELECT version();")
+        print("Database version:", cursor.fetchone())
+    except Exception as e:
+        print("Connection failed:", e)
+    query = "SELECT * FROM survey_results_public;"
+    df = pd.read_sql_query(query, conn)
+    
+    df = df[["country", "edlevel", "yearscodepro", "employment", "convertedcompyearly"]]
+    df = df.rename({"convertedcompyearly": "salary"}, axis = 1) 
+    df = df[df["salary"].notnull()]
     df = df.dropna()
-    df = df[df["Employment"] == "Employed, full-time"]
-    df = df.drop("Employment", axis = 1)
+    df = df[df["employment"] == "Employed, full-time"]
+    df = df.drop("employment", axis = 1)
 
-    country_map = shorten_categories(df.Country.value_counts(), 400)
-    df['Country'] = df['Country'].map(country_map)
-    df = df[df['Salary'] <= 250000]
-    df = df[df['Salary'] >= 10000]
-    df = df[df['Country'] != 'Other']
+    country_map = shorten_categories(df.country.value_counts(), 400)
+    df['country'] = df['country'].map(country_map)
+    df = df[df['salary'] <= 250000]
+    df = df[df['salary'] >= 10000]
+    df = df[df['country'] != 'Other']
 
-    df['YearsCodePro'] = df['YearsCodePro'].apply(clean_experience)
-    df['EdLevel'] = df['EdLevel'].apply(clean_education)
+    df['yearscodepro'] = df['yearscodepro'].apply(clean_experience)
+    df['edlevel'] = df['edlevel'].apply(clean_education)
     return df
 
 df = load_data()
@@ -55,7 +82,7 @@ def show_explore_page():
 
     st.write("""### Stack Overflow Developer Salaries""")
 
-    data = df["Country"].value_counts()
+    data = df["country"].value_counts()
 
     fig1, ax1 = plt.subplots()
     ax1.pie(data, labels = data.index, autopct = "%1.1f%%", shadow = True, startangle = 90)
@@ -67,10 +94,10 @@ def show_explore_page():
 
     st.write("""#### Mean Salary based on Country""")
 
-    data = df.groupby(["Country"])["Salary"].mean().sort_values(ascending=True)
+    data = df.groupby(["country"])["salary"].mean().sort_values(ascending=True)
     st.bar_chart(data)
 
     st.write("""#### Mean Salary based on Experience""")
 
-    data = df.groupby(["YearsCodePro"])["Salary"].mean().sort_values(ascending=True)
+    data = df.groupby(["yearscodepro"])["salary"].mean().sort_values(ascending=True)
     st.line_chart(data)
