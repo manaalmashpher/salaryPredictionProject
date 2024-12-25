@@ -55,12 +55,12 @@ def load_data():
         )
         query = "SELECT * FROM survey_results_public;"
         df = pd.read_sql_query(query, conn)
-        df = df[["country", "edlevel", "yearscodepro", "employment", "convertedcompyearly"]]
-        df = df.rename({"convertedcompyearly": "salary"}, axis = 1) 
-        df = df[df["salary"].notnull()]
+        df = df[['country', 'edlevel', 'yearscodepro', 'employment', 'convertedcompyearly']]
+        df = df.rename({'convertedcompyearly': 'salary'}, axis = 1) 
+        df = df[df['salary'].notnull()]
         df = df.dropna()
-        df = df[df["employment"] == "Employed, full-time"]
-        df = df.drop("employment", axis = 1)
+        df = df[df['employment'] == "Employed, full-time"]
+        df = df.drop('employment', axis = 1)
 
         country_map = shorten_categories(df.country.value_counts(), 400)
         df['country'] = df['country'].map(country_map)
