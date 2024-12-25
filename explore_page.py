@@ -78,6 +78,7 @@ def load_data():
 df = load_data()
 
 def show_explore_page():
+    df = load_data()
     st.title("Explore Recent Trends in Salary of Software Engineers")
 
     st.write("""### Stack Overflow Developer Salaries""")
