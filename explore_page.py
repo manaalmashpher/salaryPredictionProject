@@ -52,14 +52,10 @@ def load_data():
             password=PASSWORD,
             port=PORT
         )
-        print("Connection successful!")
-        if conn:
-            cursor = conn.cursor()
+        query = "SELECT * FROM survey_results_public;"
+        df = pd.read_sql_query(query, conn)
     except Exception as e:
         print("Connection failed:", e)
-
-    query = "SELECT * FROM survey_results_public;"
-    df = pd.read_sql_query(query, conn)
 
     df = df[["country", "edlevel", "yearscodepro", "employment", "convertedcompyearly"]]
     df = df.rename({"convertedcompyearly": "salary"}, axis = 1) 
