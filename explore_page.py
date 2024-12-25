@@ -82,7 +82,7 @@ def show_explore_page():
 
     st.write("""### Stack Overflow Developer Salaries""")
 
-    data = df["country"].value_counts()
+    data = df['country'].value_counts()
 
     fig1, ax1 = plt.subplots()
     ax1.pie(data, labels = data.index, autopct = "%1.1f%%", shadow = True, startangle = 90)
