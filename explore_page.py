@@ -44,6 +44,7 @@ PORT = os.getenv("NEONDB_PORT")
 @st.cache_data
 def load_data():
     conn = None
+    df = pd.DataFrame()
     try:
         conn = psycopg2.connect(
             host=HOST,
@@ -56,6 +57,7 @@ def load_data():
         df = pd.read_sql_query(query, conn)
     except Exception as e:
         print("Connection failed:", e)
+        st.error(f"Error connecting to the database: {e}")
 
     df = df[["country", "edlevel", "yearscodepro", "employment", "convertedcompyearly"]]
     df = df.rename({"convertedcompyearly": "salary"}, axis = 1) 
