@@ -35,29 +35,30 @@ def clean_education(x):
     return "Less than a Bachelor's"
 
 
-host = os.getenv("NEONDB_HOST")
-database = os.getenv("NEONDB_DATABASE")
-user = os.getenv("NEONDB_USER")
-password = os.getenv("NEONDB_PASSWORD")
-port = os.getenv("NEONDB_PORT")
+HOST = os.getenv("NEONDB_HOST")
+DATABASE = os.getenv("NEONDB_DATABASE")
+USER = os.getenv("NEONDB_USER")
+PASSWORD = os.getenv("NEONDB_PASSWORD")
+PORT = os.getenv("NEONDB_PORT")
 #print("Database Host:", host)
-try:
-    conn = psycopg2.connect(
-        host=host,
-        database=database,
-        user=user,
-        password=password,
-        port=port
-    )
-    print("Connection successful!")
-    if conn:
-        cursor = conn.cursor()
-except Exception as e:
-    print("Connection failed:", e)
-query = "SELECT * FROM survey_results_public;"
 
 @st.cache_data
 def load_data():
+    try:
+        conn = psycopg2.connect(
+            host=HOST,
+            database=DATABASE,
+            user=USER,
+            password=PASSWORD,
+            port=PORT
+        )
+        print("Connection successful!")
+        if conn:
+            cursor = conn.cursor()
+    except Exception as e:
+        print("Connection failed:", e)
+
+    query = "SELECT * FROM survey_results_public;"
     df = pd.read_sql_query(query, conn)
 
     df = df[["country", "edlevel", "yearscodepro", "employment", "convertedcompyearly"]]
