@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 import psycopg2
 
 load_dotenv()
-conn = None
 
 def shorten_categories(categories, cutoff):
     categorical_map = {}
@@ -44,6 +43,7 @@ PORT = os.getenv("NEONDB_PORT")
 
 @st.cache_data
 def load_data():
+    conn = None
     try:
         conn = psycopg2.connect(
             host=HOST,
