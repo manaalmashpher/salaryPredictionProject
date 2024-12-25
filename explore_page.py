@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import psycopg2
 
 load_dotenv()
-global conn
+conn = None
 
 def shorten_categories(categories, cutoff):
     categorical_map = {}
@@ -50,9 +50,8 @@ try:
         port=port
     )
     print("Connection successful!")
-    cursor = conn.cursor()
-    cursor.execute("SELECT version();")
-    print("Database version:", cursor.fetchone())
+    if conn:
+        cursor = conn.cursor()
 except Exception as e:
     print("Connection failed:", e)
 query = "SELECT * FROM survey_results_public;"
