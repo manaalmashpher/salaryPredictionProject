@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import psycopg2
 
 load_dotenv()
+global conn
 
 def shorten_categories(categories, cutoff):
     categorical_map = {}
