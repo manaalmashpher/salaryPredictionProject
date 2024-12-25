@@ -34,31 +34,33 @@ def clean_education(x):
         return "Post grad"
     return "Less than a Bachelor's"
 
+
+host = os.getenv("NEONDB_HOST")
+database = os.getenv("NEONDB_DATABASE")
+user = os.getenv("NEONDB_USER")
+password = os.getenv("NEONDB_PASSWORD")
+port = os.getenv("NEONDB_PORT")
+#print("Database Host:", host)
+try:
+    conn = psycopg2.connect(
+        host=host,
+        database=database,
+        user=user,
+        password=password,
+        port=port
+    )
+    print("Connection successful!")
+    cursor = conn.cursor()
+    cursor.execute("SELECT version();")
+    print("Database version:", cursor.fetchone())
+except Exception as e:
+    print("Connection failed:", e)
+query = "SELECT * FROM survey_results_public;"
+
 @st.cache_data
 def load_data():
-    host = os.getenv("NEONDB_HOST")
-    database = os.getenv("NEONDB_DATABASE")
-    user = os.getenv("NEONDB_USER")
-    password = os.getenv("NEONDB_PASSWORD")
-    port = os.getenv("NEONDB_PORT")
-    #print("Database Host:", host)
-    try:
-        conn = psycopg2.connect(
-            host=host,
-            database=database,
-            user=user,
-            password=password,
-            port=port
-        )
-        print("Connection successful!")
-        cursor = conn.cursor()
-        cursor.execute("SELECT version();")
-        print("Database version:", cursor.fetchone())
-    except Exception as e:
-        print("Connection failed:", e)
-    query = "SELECT * FROM survey_results_public;"
     df = pd.read_sql_query(query, conn)
-    
+
     df = df[["country", "edlevel", "yearscodepro", "employment", "convertedcompyearly"]]
     df = df.rename({"convertedcompyearly": "salary"}, axis = 1) 
     df = df[df["salary"].notnull()]
